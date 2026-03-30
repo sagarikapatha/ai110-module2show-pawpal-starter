@@ -4,13 +4,35 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+- Briefly describe your initial UML design.\
+For PawPal+, I identified three main actions that users should be able to perform.\
+First, a user should be able to add and manage pets. Since the system is focused on pet care, each owner needs a way to store information about their pets, such as the pet’s name, type, age, and other basic details.\
+Second, a user should be able to schedule and track pet care tasks. These tasks may include feeding, walking, giving medication, or attending vet appointments. Each task should belong to a specific pet and include useful details such as date, time, priority, and whether it repeats.\
+Third, a user should be able to view and organize daily tasks. The system should help owners quickly understand what needs to be done today by displaying tasks in a clear order, such as by time or priority. It should also support logic for identifying overlapping or conflicting tasks.
+
+- What classes did you include, and what responsibilities did you assign to each?\
+The initial UML design for PawPal+ focuses on four main classes: Owner, Pet, Task, and Scheduler. These classes represent the core components needed to manage pet care routines.
+
+The **Owner** class represents the user of the system. It is responsible for storing basic owner information and maintaining a list of pets that belong to the owner. This allows the system to organize pet care tasks under a specific user.
+
+The **Pet** class represents an individual pet. Each pet belongs to an owner and contains information such as the pet's name, type, and age. The Pet class also manages a list of tasks related to that pet, such as feeding, walking, or medication.
+
+The **Task** class represents a care activity that needs to be performed for a pet. A task contains details such as the task name, scheduled time, priority level, and whether it repeats. This class is responsible for storing and updating task information.
+
+The **Scheduler** class manages the organization of tasks. It is responsible for sorting tasks by time or priority, detecting scheduling conflicts, and retrieving tasks for a specific day. This class acts as the logic layer that helps keep the pet care schedule organized.
+
+Together, these classes create a modular structure where owners manage pets, pets manage tasks, and the scheduler ensures tasks are organized efficiently.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+- Did your design change during implementation?\
+Yes
+- If yes, describe at least one change and why you made it.\
+After reviewing my class skeleton with AI, I made an important design refinement to reduce ambiguity in task management. Initially, both the Pet class and the Scheduler class had responsibility for adding and storing tasks. This created a duplication problem because it was unclear whether tasks should live inside each pet or inside the scheduler.
+
+To fix this, I made Pet the single source of truth for task storage. Each pet now owns its own list of tasks, and tasks are added through the Pet class. I updated the Scheduler design so that it works with a list of pets instead of maintaining a separate flat task list. This makes the Scheduler responsible only for organizing, sorting, and checking conflicts across pet tasks, rather than storing them.
+
+I made this change because it creates a clearer separation of responsibilities, reduces data duplication, and makes conflict detection more meaningful by allowing tasks to be grouped by pet.
 
 ---
 
