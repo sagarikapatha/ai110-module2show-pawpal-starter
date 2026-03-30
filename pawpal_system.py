@@ -1,6 +1,6 @@
 ﻿from __future__ import annotations
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Tuple
 
 @dataclass
@@ -10,7 +10,7 @@ class Task:
     task_type: str
     scheduled_time: datetime
     priority: int
-    recurring: bool = False
+    frequency: str = "none"
     status: str = "pending"
 
     def mark_complete(self) -> None:
@@ -19,7 +19,7 @@ class Task:
 
     def update_task(self, **kwargs) -> None:
         """Update task attributes safely using a whitelist of editable fields."""
-        editable_fields = {"title", "task_type", "scheduled_time", "priority", "recurring", "status"}
+        editable_fields = {"title", "task_type", "scheduled_time", "priority", "frequency", "status"}
         for key, value in kwargs.items():
             if key in editable_fields:
                 setattr(self, key, value)
@@ -91,19 +91,70 @@ class Scheduler:
         all_tasks = self.get_all_tasks()
         return sorted(all_tasks, key=lambda t: (-t.priority, t.scheduled_time))
 
-    def detect_conflicts(self) -> List[Tuple[Task, Task]]:
-        """Find all conflicting tasks (same scheduled_time within same pet)."""
-        conflicts = []
-        for pet in self.pets:
-            tasks = pet.tasks
-            for i, task1 in enumerate(tasks):
-                for task2 in tasks[i + 1:]:
-                    if task1.is_conflicting(task2):
-                        conflicts.append((task1, task2))
-        return conflicts
+    def sort_by_time(self) -> List[Task]:
+        """Sort tasks by scheduled_time."""
+        all_tasks = self.get_all_tasks()
+        return sorted(all_tasks, key=lambda t: t.scheduled_time)
+    
+    def detect_conflicts(self) -> List[str]:
+        """Return warning messages for tasks scheduled at the same time."""
+        warnings = []
+        all_tasks = self.get_all_tasks()
+
+        for i, task1 in enumerate(all_tasks):
+            for task2 in all_tasks[i + 1:]:
+                if task1.scheduled_time == task2.scheduled_time:
+                    pet1 = next((pet.name for pet in self.pets if task1 in pet.tasks), "Unknown")
+                    pet2 = next((pet.name for pet in self.pets if task2 in pet.tasks), "Unknown")
+
+                    warnings.append(
+                        f"Conflict detected: '{task1.title}' for {pet1} and "
+                        f"'{task2.title}' for {pet2} are both scheduled at "
+                        f"{task1.scheduled_time.strftime('%Y-%m-%d %H:%M')}."
+                    )
+        return warnings
 
     def get_today_tasks(self) -> List[Task]:
         """Get all tasks scheduled for today."""
         today = datetime.now().date()
         return [t for t in self.get_all_tasks() if t.scheduled_time.date() == today]
+
+    def filter_by_status(self, status: str) -> List[Task]:
+        """Return tasks that match the given status."""
+        all_tasks = self.get_all_tasks()
+        return [task for task in all_tasks if task.status == status]
+
+    def filter_by_pet_name(self, pet_name: str) -> List[Task]:
+        """Return tasks for the pet with the given name."""
+        matched_tasks = []
+        for pet in self.pets:
+            if pet.name.lower() == pet_name.lower():
+                matched_tasks.extend(pet.tasks)
+        return matched_tasks
+    
+    def mark_task_complete(self, task: Task) -> None:
+        """Mark a task complete and create the next recurring task if needed."""
+        task.mark_complete()
+
+        if task.frequency == "daily":
+            next_time = task.scheduled_time + timedelta(days=1)
+        elif task.frequency == "weekly":
+            next_time = task.scheduled_time + timedelta(weeks=1)
+        else:
+            return
+
+        new_task = Task(
+            task_id=f"{task.task_id}_next",
+            title=task.title,
+            task_type=task.task_type,
+            scheduled_time=next_time,
+            priority=task.priority,
+            frequency=task.frequency,
+            status="pending",
+        )
+
+        for pet in self.pets:
+            if task in pet.tasks:
+                pet.add_task(new_task)
+                break
 

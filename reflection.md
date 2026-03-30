@@ -43,10 +43,18 @@ I made this change because it creates a clearer separation of responsibilities, 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+My scheduler considers several basic constraints when organizing pet care tasks. The main constraint is **scheduled time**, because tasks need to happen in a clear order throughout the day. It also considers **priority**, so more important tasks such as feeding, medication, or vet visits can be ranked above less urgent tasks. In addition, the scheduler uses **status** to separate pending tasks from completed ones, and it supports **frequency** so recurring daily or weekly tasks can automatically generate their next occurrence.
+
+I decided that time and priority mattered most because they have the biggest impact on how a pet owner plans daily care. A task that is urgent but scheduled later still needs attention, while tasks that happen earlier should appear in the correct chronological order. Status and recurrence were also important, but they mainly support organization rather than deciding the main task order.
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+
+My scheduler considers several basic constraints when organizing pet care tasks. The main constraint is **scheduled time**, because tasks need to happen in a clear order throughout the day. It also considers **priority**, so more important tasks such as feeding, medication, or vet visits can be ranked above less urgent tasks. In addition, the scheduler uses **status** to separate pending tasks from completed ones, and it supports **frequency** so recurring daily or weekly tasks can automatically generate their next occurrence.
+
+I decided that time and priority mattered most because they have the biggest impact on how a pet owner plans daily care. A task that is urgent but scheduled later still needs attention, while tasks that happen earlier should appear in the correct chronological order. Status and recurrence were also important, but they mainly support organization rather than deciding the main task order.
 
 ---
 

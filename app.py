@@ -1,4 +1,5 @@
 import streamlit as st
+from pawpal_system import Owner, Pet, Task, Scheduler
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -38,16 +39,50 @@ At minimum, your system should:
 
 st.divider()
 
-st.subheader("Quick Demo Inputs (UI only)")
+st.subheader("Owner Information")
 owner_name = st.text_input("Owner name", value="Jordan")
-pet_name = st.text_input("Pet name", value="Mochi")
-species = st.selectbox("Species", ["dog", "cat", "other"])
 
-st.markdown("### Tasks")
-st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
+# Initialize session state objects
+if "owner" not in st.session_state:
+    st.session_state.owner = Owner(owner_id="o1", name=owner_name, contact_info="")
+
+if "scheduler" not in st.session_state:
+    st.session_state.scheduler = Scheduler()
 
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
+
+if "pet_counter" not in st.session_state:
+    st.session_state.pet_counter = 1
+
+owner = st.session_state.owner
+scheduler = st.session_state.scheduler
+owner.name = owner_name
+
+st.subheader("Add a Pet")
+pet_name = st.text_input("Pet name", value="Mochi")
+species = st.selectbox("Species", ["dog", "cat", "other"])
+age = st.number_input("Age", min_value=0, value=1)
+breed = st.text_input("Breed", value="Unknown")
+
+if st.button("Add Pet"):
+    pet_id = f"p{st.session_state.pet_counter}"
+    st.session_state.pet_counter += 1
+    new_pet = Pet(pet_id=pet_id, name=pet_name, species=species, age=age, breed=breed)
+    owner.add_pet(new_pet)
+    scheduler.add_pet(new_pet)
+    st.success(f"Added pet: {pet_name}")
+
+st.subheader("Your Pets")
+pets = owner.view_pets()
+if pets:
+    for pet in pets:
+        st.write(f"- {pet.name} ({pet.species}, {pet.age} years old, {pet.breed})")
+else:
+    st.info("No pets added yet.")
+
+st.markdown("### Tasks")
+st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
 
 col1, col2, col3 = st.columns(3)
 with col1:
