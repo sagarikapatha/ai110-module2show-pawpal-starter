@@ -1,16 +1,7 @@
 ﻿from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import IntEnum
 from typing import List, Tuple
-
-
-class Priority(IntEnum):
-    """Task priority levels for the PawPal+ system."""
-    LOW = 1
-    MEDIUM = 2
-    HIGH = 3
-
 
 @dataclass
 class Task:
@@ -18,7 +9,7 @@ class Task:
     title: str
     task_type: str
     scheduled_time: datetime
-    priority: Priority = Priority.MEDIUM
+    priority: int
     recurring: bool = False
     status: str = "pending"
 
@@ -70,9 +61,9 @@ class Owner:
 
 @dataclass
 class Scheduler:
-    tasks: List[Task] = field(default_factory=list)
+    pets: List[Pet] = field(default_factory=list)
 
-    def add_task(self, task: Task) -> None:
+    def add_pet(self, pet: Pet) -> None:
         pass
 
     def sort_tasks(self) -> List[Task]:
